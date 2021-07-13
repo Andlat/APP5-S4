@@ -35,8 +35,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
   while(analLex.resteTerminal()){
     Terminal<Object> term = analLex.prochainTerminal();
 
-
-    if(term.getType()==Terminal.Type.OPERAND){
+    if(term.getType()==Terminal.Type.NOMBRE || term.getType()==Terminal.Type.VARIABLE){
         FeuilleAST feuille = new FeuilleAST(term);
       if(current != null) {
         if (current.left == null) {
@@ -53,7 +52,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
 
     }
-    else if(term.getType()==Terminal.Type.OPERATOR){
+
 
       if(firstNode){
         NoeudAST noeud = new NoeudAST(term);
@@ -63,7 +62,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
         firstNode = false;
       }
 
-      else if(term.getOperatorType() == Terminal.OperatorType.AddSub){
+      else if(term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD){
 
 
         while(current.parent != null && current.terminal != null){
@@ -82,7 +81,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
 
       }
-      else if(term.getOperatorType() == Terminal.OperatorType.MultDiv){
+      else if(term.getType() == Terminal.Type.MULT || term.getType() == Terminal.Type.DIV){
 
 
         if(current.terminal == null){
@@ -96,7 +95,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
         }
       }
 
-      else if(term.getOperatorType() == Terminal.OperatorType.BracketOpen){
+      else if(term.getType() == Terminal.Type.PARENTH_OUV ){
         NoeudAST noeud = new NoeudAST(null);
         noeud.parent = current;
         if(current.left == null){
@@ -110,12 +109,12 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
         current = noeud;
 
       }
-      else if(term.getOperatorType() == Terminal.OperatorType.BracketClose){
+      else if(term.getType() == Terminal.Type.PARENTH_FERM){
         current = (NoeudAST) current.parent;
       }
 
 
-    }
+
   }
 
   return null;
