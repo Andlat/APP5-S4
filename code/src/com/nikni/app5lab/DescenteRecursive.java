@@ -10,6 +10,7 @@ public class DescenteRecursive {
   AnalLex analLex;
   NoeudAST root;
   NoeudAST current;
+  ElemAST firstVal;
 
 
 /** Constructeur de DescenteRecursive :
@@ -20,7 +21,7 @@ public DescenteRecursive(String in) {
 
     analLex = new AnalLex(new Reader(in));
     root = null;
-    current = null;
+    current = new NoeudAST(null);
 }
 
 
@@ -29,33 +30,88 @@ public DescenteRecursive(String in) {
  */
 public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
+ boolean firstNode = true;
 
   while(analLex.resteTerminal()){
     Terminal<Object> term = analLex.prochainTerminal();
+
+
     if(term.getType()==Terminal.Type.OPERAND){
-      FeuilleAST feuille = new FeuilleAST(term);
-      if(current.left == null){
-        current.left = feuille;
+        FeuilleAST feuille = new FeuilleAST(term);
+      if(current != null) {
+        if (current.left == null) {
+          current.left = feuille;
+          feuille.parent = current;
+        } else if (current.right == null) {
+          current.right = feuille;
+          feuille.parent = current;
+        } else
+          this.ErreurSynt("Error: Too many consecutives variables/numbers");
       }
-      else if(current.right == null){
-        current.right = feuille;
-      }
+      else
+        firstVal = feuille;
 
 
     }
     else if(term.getType()==Terminal.Type.OPERATOR){
 
-      if(term.getOperatorType() == Terminal.OperatorType.AddSub){
+      if(firstNode){
+        NoeudAST noeud = new NoeudAST(term);
+        noeud.left = firstVal;
+        current = noeud;
+        root = noeud;
+        firstNode = false;
+      }
+
+      else if(term.getOperatorType() == Terminal.OperatorType.AddSub){
+
+
+        while(current.parent != null && current.terminal != null){
+          current = (NoeudAST) current.parent;
+        }
+        if(current.terminal == null){
+          current.terminal = term;
+        }
+        else{
+          NoeudAST noeud = new NoeudAST(term);
+          noeud.left = root;
+          root.parent = noeud;
+          root = noeud;
+          current = noeud;
+        }
+
 
       }
       else if(term.getOperatorType() == Terminal.OperatorType.MultDiv){
 
+
+        if(current.terminal == null){
+          current.terminal = term;
+        }
+        else{
+          NoeudAST noeud = new NoeudAST(term);
+          noeud.left = current.right;
+          noeud.parent = current;
+          current = noeud;
+        }
       }
+
       else if(term.getOperatorType() == Terminal.OperatorType.BracketOpen){
+        NoeudAST noeud = new NoeudAST(null);
+        noeud.parent = current;
+        if(current.left == null){
+          current.left = noeud;
+        }
+        else if(current.right == null){
+          current.right = noeud;
+        }
+        else
+          ErreurSynt("Error: Misuse of brackets");
+        current = noeud;
 
       }
       else if(term.getOperatorType() == Terminal.OperatorType.BracketClose){
-
+        current = (NoeudAST) current.parent;
       }
 
 
