@@ -126,7 +126,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
   }
 
-  return null;
+  return root;
 }
 
 
