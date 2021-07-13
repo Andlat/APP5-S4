@@ -1,27 +1,66 @@
 package com.nikni.app5lab;
 
+
 /** @author Ahmed Khoumsi */
 
 /** Cette classe effectue l'analyse syntaxique
  */
 public class DescenteRecursive {
 
-  // Attributs
+  AnalLex analLex;
+  NoeudAST root;
+  NoeudAST current;
+
 
 /** Constructeur de DescenteRecursive :
       - recoit en argument le nom du fichier contenant l'expression a analyser
       - pour l'initalisation d'attribut(s)
  */
 public DescenteRecursive(String in) {
-    //
+
+    analLex = new AnalLex(new Reader(in));
+    root = null;
+    current = null;
 }
 
 
 /** AnalSynt() effectue l'analyse syntaxique et construit l'AST.
  *    Elle retourne une reference sur la racine de l'AST construit
  */
-public ElemAST AnalSynt( ) {
-   //
+public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
+
+
+  while(analLex.resteTerminal()){
+    Terminal<Object> term = analLex.prochainTerminal();
+    if(term.getType()==Terminal.Type.OPERAND){
+      FeuilleAST feuille = new FeuilleAST(term);
+      if(current.left == null){
+        current.left = feuille;
+      }
+      else if(current.right == null){
+        current.right = feuille;
+      }
+
+
+    }
+    else if(term.getType()==Terminal.Type.OPERATOR){
+
+      if(term.getOperatorType() == Terminal.OperatorType.AddSub){
+
+      }
+      else if(term.getOperatorType() == Terminal.OperatorType.MultDiv){
+
+      }
+      else if(term.getOperatorType() == Terminal.OperatorType.BracketOpen){
+
+      }
+      else if(term.getOperatorType() == Terminal.OperatorType.BracketClose){
+
+      }
+
+
+    }
+  }
 
   return null;
 }

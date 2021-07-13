@@ -51,7 +51,7 @@ public class AnalLex {
 
       switch (m_currentState) {
         case E:
-          if(c == '+') return new Terminal<>(Terminal.Type.OPERATOR, c);
+          if(c == '+') return new Terminal<>(Terminal.Type.OPERATOR,Terminal.OperatorType.AddSub , c);
           else if(c == '0' || c == '1'){
             m_ulBuilder.setLength(0); // Reset the string builder for the next UL
             m_ulBuilder.append(c);
@@ -64,12 +64,12 @@ public class AnalLex {
             m_ulBuilder.append(c);
           }else{
             m_it.previous();
-            return new Terminal<>(Terminal.Type.OPERAND, m_ulBuilder.toString());
+            return new Terminal<>(Terminal.Type.OPERAND,Terminal.OperatorType.Null, m_ulBuilder.toString());
           }
           break;
       }
     }
-    return new Terminal<>(Terminal.Type.OPERAND, m_ulBuilder.toString()); // Should only reach this statement if reading the end of file/string to analyze
+    return new Terminal<>(Terminal.Type.OPERAND,Terminal.OperatorType.Null, m_ulBuilder.toString()); // Should only reach this statement if reading the end of file/string to analyze
   }
 
 //

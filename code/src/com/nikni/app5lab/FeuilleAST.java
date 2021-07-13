@@ -12,7 +12,7 @@ public class FeuilleAST extends ElemAST {
 
 /**Constructeur pour l'initialisation d'attribut(s)
  */
-  public FeuilleAST( ) {  // avec arguments
+  public FeuilleAST( Terminal<Object> term) {  // avec arguments
     //
   }
 
