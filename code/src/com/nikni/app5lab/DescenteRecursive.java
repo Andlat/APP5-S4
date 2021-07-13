@@ -34,7 +34,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
   while(analLex.resteTerminal()){
     Terminal<Object> term = analLex.prochainTerminal();
-
+    System.out.println(term.getValue());
     if(term.getType()==Terminal.Type.NOMBRE || term.getType()==Terminal.Type.VARIABLE){
         FeuilleAST feuille = new FeuilleAST(term);
       if(current != null) {
@@ -55,10 +55,19 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
 
       if(firstNode){
-        NoeudAST noeud = new NoeudAST(term);
-        noeud.left = firstVal;
-        current = noeud;
-        root = noeud;
+        if(term.getType() == Terminal.Type.PARENTH_OUV ){
+          NoeudAST noeud = new NoeudAST(null);
+          NoeudAST noeud2 = new NoeudAST(null);
+          noeud.parent = noeud2;
+          current = noeud;
+          root = noeud2;
+        }
+        else{
+          NoeudAST noeud = new NoeudAST(term);
+          noeud.left = firstVal;
+          current = noeud;
+          root = noeud;
+        }
         firstNode = false;
       }
 
