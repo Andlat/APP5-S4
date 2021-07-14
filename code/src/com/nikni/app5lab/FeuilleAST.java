@@ -7,29 +7,29 @@ package com.nikni.app5lab;
 public class FeuilleAST extends ElemAST {
 
   // Attribut(s)
-
+    Terminal term;
 
 
 /**Constructeur pour l'initialisation d'attribut(s)
  */
   public FeuilleAST( Terminal<Object> term) {  // avec arguments
-    //
+    this.term = term;
   }
 
 
   /** Evaluation de feuille d'AST
    */
   public int EvalAST( ) {
-    //
-      return -1;
+      int res = Integer.parseInt((String)term.getValue());
+      return res;
   }
 
 
  /** Lecture de chaine de caracteres correspondant a la feuille d'AST
   */
   public String LectAST( ) {
-    //
-      return "";
+
+      return "Feuille Contient: " + (String)term.getValue();
   }
 
 }

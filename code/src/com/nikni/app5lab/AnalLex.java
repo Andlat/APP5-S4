@@ -113,8 +113,6 @@ public class AnalLex {
           break;
       }
     }
-    System.out.println("CurrentState: " + m_currentState );
-    System.out.println("value: " + m_ulBuilder.toString() );
     return new Terminal<>(m_currentState==State.E ? Terminal.Type.NOMBRE : Terminal.Type.VARIABLE, m_ulBuilder.toString()); // Should only reach this statement if reading the end of file/string to analyze
   }
 

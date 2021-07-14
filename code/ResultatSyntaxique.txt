@@ -1,0 +1,17 @@
+Lecture de l'AST trouve : 
+Noeud: ADD 
+  Left: 
+Noeud: MULT 
+  Left: 
+Noeud: ADD 
+  Left: Feuille Contient: 5
+  Right: Feuille Contient: 2
+Fin Noeud ADD  
+
+  Right: Feuille Contient: 3
+Fin Noeud MULT  
+
+  Right: Feuille Contient: 7
+Fin Noeud ADD  
+
+Evaluation de l'AST trouve : 28

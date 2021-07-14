@@ -34,10 +34,11 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
   while(analLex.resteTerminal()){
     Terminal<Object> term = analLex.prochainTerminal();
-    System.out.println(term.getValue());
+
     if(term.getType()==Terminal.Type.NOMBRE || term.getType()==Terminal.Type.VARIABLE){
-        FeuilleAST feuille = new FeuilleAST(term);
-      if(current != null) {
+      FeuilleAST feuille = new FeuilleAST(term);
+
+      if(!firstNode) {
         if (current.left == null) {
           current.left = feuille;
           feuille.parent = current;
@@ -47,8 +48,10 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
         } else
           this.ErreurSynt("Error: Too many consecutives variables/numbers");
       }
-      else
+      else{
         firstVal = feuille;
+      }
+
 
 
     }
@@ -59,11 +62,12 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
           NoeudAST noeud = new NoeudAST(null);
           NoeudAST noeud2 = new NoeudAST(null);
           noeud.parent = noeud2;
+          noeud2.left = noeud;
           current = noeud;
           root = noeud2;
         }
         else{
-          NoeudAST noeud = new NoeudAST(term);
+          NoeudAST noeud = new NoeudAST(null);
           noeud.left = firstVal;
           current = noeud;
           root = noeud;
@@ -73,12 +77,12 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
       else if(term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD){
 
-
         while(current.parent != null && current.terminal != null){
           current = (NoeudAST) current.parent;
         }
         if(current.terminal == null){
           current.terminal = term;
+
         }
         else{
           NoeudAST noeud = new NoeudAST(term);
@@ -92,13 +96,14 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
       }
       else if(term.getType() == Terminal.Type.MULT || term.getType() == Terminal.Type.DIV){
 
-
         if(current.terminal == null){
           current.terminal = term;
+
         }
         else{
           NoeudAST noeud = new NoeudAST(term);
           noeud.left = current.right;
+          current.right = noeud;
           noeud.parent = current;
           current = noeud;
         }
@@ -109,14 +114,17 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
         noeud.parent = current;
         if(current.left == null){
           current.left = noeud;
+
         }
         else if(current.right == null){
           current.right = noeud;
+
         }
         else
           ErreurSynt("Error: Misuse of brackets");
-        current = noeud;
 
+
+        current = noeud;
       }
       else if(term.getType() == Terminal.Type.PARENTH_FERM){
         current = (NoeudAST) current.parent;
