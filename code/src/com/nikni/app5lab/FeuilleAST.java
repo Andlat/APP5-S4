@@ -7,7 +7,7 @@ package com.nikni.app5lab;
 public class FeuilleAST extends ElemAST {
 
   // Attribut(s)
-    Terminal term;
+    Terminal<Object> term;
 
 
 /**Constructeur pour l'initialisation d'attribut(s)
@@ -31,5 +31,10 @@ public class FeuilleAST extends ElemAST {
 
       return "Feuille Contient: " + (String)term.getValue();
   }
+
+    @Override
+    public String toPostfix() {
+        return term.getValue().toString();
+    }
 
 }

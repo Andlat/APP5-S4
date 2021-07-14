@@ -50,6 +50,11 @@ public class NoeudAST extends ElemAST {
     return out;
   }
 
+  @Override
+  public String toPostfix() {
+    return left.toPostfix() + ' ' + right.toPostfix() + ' ' + terminal.getValue();
+  }
+
 }
 
 

@@ -173,6 +173,8 @@ public void ErreurSynt(String s)
       System.out.println(toWriteEval);
       Writer w = new Writer(args[1],toWriteLect+toWriteEval); // Ecriture de toWrite 
                                                               // dans fichier args[1]
+      System.out.println(RacineAST.toPostfix() + '\n');
+
     } catch (Exception e) {
       System.out.println(e);
       e.printStackTrace();
