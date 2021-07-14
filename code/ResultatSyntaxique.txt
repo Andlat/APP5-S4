@@ -1,17 +1,17 @@
 Lecture de l'AST trouve : 
-Noeud: ADD 
+Noeud: SOUS 
   Left: 
+Noeud: SOUS 
+  Left: Feuille Contient: A_b
+  Right: 
 Noeud: MULT 
-  Left: 
-Noeud: ADD 
   Left: Feuille Contient: 5
-  Right: Feuille Contient: 2
-Fin Noeud ADD  
-
-  Right: Feuille Contient: 3
+  Right: Feuille Contient: 47
 Fin Noeud MULT  
 
-  Right: Feuille Contient: 7
-Fin Noeud ADD  
+Fin Noeud SOUS  
 
-Evaluation de l'AST trouve : 28
+  Right: Feuille Contient: 2
+Fin Noeud SOUS  
+
+Evaluation de l'AST impossible, puisqu'il contient une variable inconnue: A_bPostfix: A_b 5 47 * - 2 -

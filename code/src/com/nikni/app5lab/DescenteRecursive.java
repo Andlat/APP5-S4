@@ -11,7 +11,7 @@ public class DescenteRecursive {
   NoeudAST root;
   NoeudAST current;
   ElemAST firstVal;
-
+  Boolean error = false;
 
 /** Constructeur de DescenteRecursive :
       - recoit en argument le nom du fichier contenant l'expression a analyser
@@ -57,7 +57,7 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
     }
 
 
-      if(firstNode){
+    if(firstNode){
         if(term.getType() == Terminal.Type.PARENTH_OUV ){
           NoeudAST noeud = new NoeudAST(null);
           NoeudAST noeud2 = new NoeudAST(null);
@@ -66,16 +66,24 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
           current = noeud;
           root = noeud2;
         }
+
         else{
+          if(firstVal == null){
+            ErreurSynt("First Caracter is neither number, variable or bracket");
+          }
           NoeudAST noeud = new NoeudAST(null);
           noeud.left = firstVal;
           current = noeud;
           root = noeud;
         }
         firstNode = false;
-      }
+    }
 
       else if(term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD){
+
+        if(current.left == null){
+          ErreurSynt("No left value when adding or substracting");
+        }
 
         while(current.parent != null && current.terminal != null){
           current = (NoeudAST) current.parent;
@@ -85,6 +93,9 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
         }
         else{
+          if(current.right == null){
+            ErreurSynt("Add character found after incomplete expression");
+          }
           NoeudAST noeud = new NoeudAST(term);
           noeud.left = root;
           root.parent = noeud;
@@ -96,11 +107,18 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
       }
       else if(term.getType() == Terminal.Type.MULT || term.getType() == Terminal.Type.DIV){
 
+        if(current.left == null){
+          ErreurSynt("No left value when mult or div");
+        }
+
         if(current.terminal == null){
           current.terminal = term;
 
         }
         else{
+          if(current.right == null){
+            ErreurSynt("Mult caracter found after incomplete expression");
+          }
           NoeudAST noeud = new NoeudAST(term);
           noeud.left = current.right;
           current.right = noeud;
@@ -121,17 +139,22 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
         }
         else
-          ErreurSynt("Error: Misuse of brackets");
+          ErreurSynt("Misuse of brackets");
 
 
         current = noeud;
       }
       else if(term.getType() == Terminal.Type.PARENTH_FERM){
+        if(current.right == null || current.left == null || current.terminal == null)
+          ErreurSynt("Bracket closed before end of expression");
         current = (NoeudAST) current.parent;
       }
 
 
 
+  }
+  if(current.left == null || current.right ==null || root.left == null || root.right == null){
+    ErreurSynt("Resulting tree contains null nodes");
   }
 
   return root;
@@ -146,9 +169,9 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
 
 /** ErreurSynt() envoie un message d'erreur syntaxique
  */
-public void ErreurSynt(String s)
+public void ErreurSynt(String s) throws AnalLex.IllegalFormatException
 {
-    //
+  throw new AnalLex.IllegalFormatException("Error received: " + s);
 }
 
 
