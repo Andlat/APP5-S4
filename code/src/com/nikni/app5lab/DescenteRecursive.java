@@ -169,11 +169,20 @@ public void ErreurSynt(String s)
       ElemAST RacineAST = dr.AnalSynt();
       toWriteLect += "Lecture de l'AST trouve : " + RacineAST.LectAST() + "\n";
       System.out.println(toWriteLect);
-      toWriteEval += "Evaluation de l'AST trouve : " + RacineAST.EvalAST() + "\n";
-      System.out.println(toWriteEval);
-      Writer w = new Writer(args[1],toWriteLect+toWriteEval); // Ecriture de toWrite 
+
+      try {
+        toWriteEval += "Evaluation de l'AST trouve : " + RacineAST.EvalAST();
+      }catch(NumberFormatException ex){
+        toWriteEval += "Evaluation de l'AST impossible, puisqu'il contient une variable inconnue: " + ex.getMessage();
+      }
+
+      System.out.println(toWriteEval + '\n');
+
+      String postfix = "Postfix: " + RacineAST.toPostfix() + '\n';
+
+      Writer w = new Writer(args[1],toWriteLect+toWriteEval+postfix); // Ecriture de toWrite
                                                               // dans fichier args[1]
-      System.out.println(RacineAST.toPostfix() + '\n');
+      System.out.println(postfix);
 
     } catch (Exception e) {
       System.out.println(e);

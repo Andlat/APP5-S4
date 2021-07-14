@@ -8,7 +8,7 @@ public abstract class ElemAST {
   public ElemAST parent = null;
   /** Evaluation d'AST
    */
-  public abstract int EvalAST();
+  public abstract int EvalAST() throws NumberFormatException;
 
 
   /** Lecture d'AST

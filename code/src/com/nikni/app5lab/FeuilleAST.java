@@ -20,8 +20,11 @@ public class FeuilleAST extends ElemAST {
   /** Evaluation de feuille d'AST
    */
   public int EvalAST( ) {
-      int res = Integer.parseInt((String)term.getValue());
-      return res;
+      try {
+          return Integer.parseInt((String) term.getValue());
+      }catch(NumberFormatException ex){
+          throw new NumberFormatException(term.getValue().toString());
+      }
   }
 
 
