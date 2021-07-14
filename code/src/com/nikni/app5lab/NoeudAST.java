@@ -45,7 +45,7 @@ public class NoeudAST extends ElemAST {
    */
   public String LectAST( ) {
      String out ="";
-     out+= "\nNoeud: "+ terminal.getType() +" \n  Left: " + left.LectAST() + "\n  Right: "+ right.LectAST() + "\nFin Noeud "+terminal.getType() +"  \n";
+     out+= "("+ left.LectAST() + " " + terminal.getValue() + " " + right.LectAST() + ")" ;
 
     return out;
   }

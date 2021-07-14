@@ -1,17 +1,2 @@
-Lecture de l'AST trouve : 
-Noeud: SOUS 
-  Left: 
-Noeud: SOUS 
-  Left: Feuille Contient: A_b
-  Right: 
-Noeud: MULT 
-  Left: Feuille Contient: 5
-  Right: Feuille Contient: 47
-Fin Noeud MULT  
-
-Fin Noeud SOUS  
-
-  Right: Feuille Contient: 2
-Fin Noeud SOUS  
-
-Evaluation de l'AST impossible, puisqu'il contient une variable inconnue: A_bPostfix: A_b 5 47 * - 2 -
+Lecture de l'AST trouve : (((U_x + 7) * (W_z / 35)) + 5)
+Evaluation de l'AST impossible, puisqu'il contient une variable inconnue: U_xPostfix: U_x 7 + W_z 35 / * 5 +

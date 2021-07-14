@@ -32,7 +32,7 @@ public class FeuilleAST extends ElemAST {
   */
   public String LectAST( ) {
 
-      return "Feuille Contient: " + (String)term.getValue();
+      return  (String)term.getValue();
   }
 
     @Override
