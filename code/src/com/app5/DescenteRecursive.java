@@ -13,7 +13,12 @@ public class DescenteRecursive {
   NoeudAST root;
   NoeudAST current;
   Terminal<Object> term;
-  ArrayList<String> stack;
+  ArrayList<String> prevTerm = new ArrayList<>();
+
+  private void prochainTerminal() throws AnalLex.IllegalFormatException {
+    term = analLex.prochainTerminal();
+    prevTerm.add(term.getValue().toString());
+  }
 
 /** Constructeur de DescenteRecursive :
       - recoit en argument le nom du fichier contenant l'expression a analyser
@@ -24,7 +29,7 @@ public DescenteRecursive (String in) throws AnalLex.IllegalFormatException{
     analLex = new AnalLex(new Reader(in));
     root = null;
     current = new NoeudAST(null);
-    term = analLex.prochainTerminal();
+    prochainTerminal();
 
 }
 
@@ -50,9 +55,9 @@ ElemAST S()throws AnalLex.IllegalFormatException{
       System.out.println("SOUS: " + term.getValue());
       NoeudAST noeud = new NoeudAST(term);
       if(!analLex.resteTerminal()){
-        ErreurSynt("No value after -");
+        ErreurSynt("Aucune valeur après '-'");
       }
-      term = analLex.prochainTerminal();
+      prochainTerminal();
       ElemAST n2 = A();
 
       noeud.left = n1;
@@ -66,9 +71,9 @@ ElemAST S()throws AnalLex.IllegalFormatException{
       System.out.println("ADD: " + term.getValue());
       NoeudAST noeud = new NoeudAST(term);
       if(!analLex.resteTerminal()){
-        ErreurSynt("No value after +");
+        ErreurSynt("Aucune valeur après '+'");
       }
-      term = analLex.prochainTerminal();
+      prochainTerminal();
       ElemAST n2 = A();
 
       noeud.left = n1;
@@ -95,9 +100,9 @@ ElemAST S()throws AnalLex.IllegalFormatException{
         System.out.println("Div: " + term.getValue());
         NoeudAST noeud = new NoeudAST(term);
         if(!analLex.resteTerminal()){
-          ErreurSynt("No value after /");
+          ErreurSynt("Aucune valeur après '/'");
         }
-        term = analLex.prochainTerminal();
+        prochainTerminal();
         ElemAST n2 = B();
 
         noeud.left = n1;
@@ -111,9 +116,9 @@ ElemAST S()throws AnalLex.IllegalFormatException{
         System.out.println("Mult: " + term.getValue());
         NoeudAST noeud = new NoeudAST(term);
         if(!analLex.resteTerminal()){
-          ErreurSynt("No value after *");
+          ErreurSynt("Aucune valeur après '*'");
         }
-        term = analLex.prochainTerminal();
+        prochainTerminal();
         ElemAST n2 = B();
 
         noeud.left = n1;
@@ -132,23 +137,23 @@ ElemAST S()throws AnalLex.IllegalFormatException{
     ElemAST n1 = null;
     if(term.getType() == Terminal.Type.VARIABLE || term.getType() == Terminal.Type.NOMBRE){
       n1 = new FeuilleAST(term);
-      term = analLex.prochainTerminal();
+      prochainTerminal();
 
     }
     else if(term.getType() == Terminal.Type.PARENTH_OUV){
       System.out.println("ParentOuv: " + term.getValue());
       if(!analLex.resteTerminal()){
-        ErreurSynt("No value after (");
+        ErreurSynt("Aucune valeur après '('");
       }
-      term = analLex.prochainTerminal();
+      prochainTerminal();
       n1 = S();
       if(term.getType() == Terminal.Type.PARENTH_FERM){
         System.out.println("ParentFerm: " + term.getValue());
-        term = analLex.prochainTerminal();
+        prochainTerminal();
       }
     }
     else{
-      ErreurSynt("Value other than number or opening bracket found");
+      ErreurSynt("Une unité lexicale autre qu'un nombre/variable ou une parenthèse ouvrante trouvée");
     }
 
 
@@ -163,7 +168,7 @@ ElemAST S()throws AnalLex.IllegalFormatException{
  */
 public void ErreurSynt(String s) throws AnalLex.IllegalFormatException
 {
-  throw new AnalLex.IllegalFormatException("Error received: " + s +" at position " + analLex.m_it.getIndex() + '.');
+  throw new AnalLex.IllegalFormatException("\nErreur: " + s +" à la position " + analLex.m_it.getIndex() + " de " + String.join(" ", prevTerm) + '.');
 }
 
 
@@ -195,13 +200,12 @@ public void ErreurSynt(String s) throws AnalLex.IllegalFormatException
 
       String postfix = "Postfix: " + RacineAST.toPostfix() + '\n';
 
-      Writer w = new Writer(args[1],toWriteLect+toWriteEval+postfix); // Ecriture de toWrite
+      Writer w = new Writer(args[1],toWriteLect+toWriteEval+'\n'+postfix); // Ecriture de toWrite
                                                               // dans fichier args[1]
       System.out.println(postfix);
 
     } catch (Exception e) {
-      System.out.println(e);
-      e.printStackTrace();
+      System.out.println(e.getMessage());
       System.exit(51);
     }
     System.out.println("Analyse syntaxique terminee");
