@@ -9,11 +9,9 @@ import java.util.ArrayList;
  */
 public class DescenteRecursive {
 
-  private AnalLex analLex;
-  private NoeudAST root;
-  private NoeudAST current;
+  private final AnalLex analLex;
   private Terminal<Object> term;
-  private ArrayList<String> prevTerm = new ArrayList<>();
+  private final ArrayList<String> prevTerm = new ArrayList<>();
   private int bracketStackCount = 0;// Stack pour les parentheses. +1 quand parenthese ouvrante. -1 quand parenthese fermante. Le total à la fin de l'analyse doit être de 0
 
   private void prochainTerminal() throws AnalLex.IllegalFormatException {
@@ -32,8 +30,7 @@ public class DescenteRecursive {
    */
   public DescenteRecursive (String in) throws AnalLex.IllegalFormatException{
       analLex = new AnalLex(new Reader(in));
-      root = null;
-      current = new NoeudAST(null);
+
       prochainTerminal();
   }
 
@@ -48,7 +45,7 @@ public class DescenteRecursive {
     return n1;
   }
 
-    private ElemAST S()throws AnalLex.IllegalFormatException{
+  private ElemAST S()throws AnalLex.IllegalFormatException{
     System.out.println("S: " + term.getValue());
     ElemAST n1 = A();
     while (term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD) {
@@ -104,10 +101,7 @@ public class DescenteRecursive {
         noeud.right = n2;
 
         n1 = noeud;
-
-
-      }
-      else if(term.getType() == Terminal.Type.MULT){
+      } else if(term.getType() == Terminal.Type.MULT){
         System.out.println("Mult: " + term.getValue());
         NoeudAST noeud = new NoeudAST(term);
         if(!analLex.resteTerminal()){
@@ -120,10 +114,7 @@ public class DescenteRecursive {
         noeud.right = n2;
 
         n1 = noeud;
-    }
-
-
-
+      }
     }
     return n1;
   }
@@ -148,8 +139,7 @@ public class DescenteRecursive {
         System.out.println("ParentFerm: " + term.getValue());
         prochainTerminal();
       }
-    }
-    else{
+    } else{
       ErreurSynt("Une unité lexicale autre qu'un nombre/variable ou une parenthèse ouvrante trouvée");
     }
 
