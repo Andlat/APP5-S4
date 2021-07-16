@@ -1,4 +1,4 @@
-package com.nikni.app5lab;
+package com.app5;
 
 /**
  * <p>Title: APP6 Compilation</p>

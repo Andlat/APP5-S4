@@ -1,4 +1,4 @@
-package com.nikni.app5lab;
+package com.app5;
 
 /** @author Ahmed Khoumsi */
 
@@ -19,8 +19,8 @@ public abstract class ElemAST {
 
   /** ErreurEvalAST() envoie un message d'erreur lors de la construction d'AST
  */  
-  public void ErreurEvalAST(String s) {	
-    // 
-  }
+//  public void ErreurEvalAST(String s) {
+//    //
+//  }
 
 }

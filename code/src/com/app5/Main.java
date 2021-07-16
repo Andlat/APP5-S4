@@ -1,4 +1,4 @@
-package com.nikni.app5lab;
+package com.app5;
 
 public class Main {
 
