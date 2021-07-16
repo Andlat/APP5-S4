@@ -1,10 +1,11 @@
-package com.nikni.app5lab;
+package com.app5;
 
 /** @author Ahmed Khoumsi */
 
 import java.text.StringCharacterIterator;
-import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** Cette classe effectue l'analyse lexicale
  */
@@ -19,12 +20,22 @@ public class AnalLex {
   public final StringCharacterIterator m_it;
   private final StringBuilder m_ulBuilder = new StringBuilder();
 
+  private final List<Terminal<Object>> prevUL = new ArrayList<>(); // Garder en mémoire les UL précédents pour les erreurs
+
   public static class IllegalFormatException extends Exception{
     IllegalFormatException(String error){ super(error); }
   }
 
   private boolean isLetter(char c){ return (c >= 65 && c <= 90) || (c >= 97 && c <= 122); }
   private boolean isNumber(char c){ return c >= 48 && c <= 57; }
+
+  /**
+   * Sauvegarder le terminal pour conserver l'emplacement d'une erreur.
+   */
+  private Terminal<Object> saveAndReturnTerminal(Terminal<Object> UL){
+    prevUL.add(UL);
+    return UL;
+  }
 
 /** Constructeur pour l'initialisation d'attribut(s)
  */
@@ -48,8 +59,10 @@ public class AnalLex {
   public Terminal<Object> prochainTerminal( ) throws IllegalFormatException {
     m_currentState = State.S; // A lexical unit starts from state S
 
+    char c = '\0';
     while(resteTerminal()) {
-      char c = m_it.current();
+      char prevChar = c;
+      c = m_it.current();
       m_it.next();
 
       if(c == ' ' || c == '\t' || c == '\r' || c == '\n') continue; //Skip spaces, tabs and new lines
@@ -57,12 +70,12 @@ public class AnalLex {
       switch (m_currentState) {
         case S: // Etat de depart de l'automate
           switch(c){
-            case '+': return new Terminal<>(Terminal.Type.ADD, c);
-            case '-': return new Terminal<>(Terminal.Type.SOUS, c);
-            case '*': return new Terminal<>(Terminal.Type.MULT, c);
-            case '/': return new Terminal<>(Terminal.Type.DIV, c);
-            case '(': return new Terminal<>(Terminal.Type.PARENTH_OUV, c);
-            case ')': return new Terminal<>(Terminal.Type.PARENTH_FERM, c);
+            case '+': return saveAndReturnTerminal(new Terminal<>(Terminal.Type.ADD, c));
+            case '-': return saveAndReturnTerminal(new Terminal<>(Terminal.Type.SOUS, c));
+            case '*': return saveAndReturnTerminal(new Terminal<>(Terminal.Type.MULT, c));
+            case '/': return saveAndReturnTerminal(new Terminal<>(Terminal.Type.DIV, c));
+            case '(': return saveAndReturnTerminal(new Terminal<>(Terminal.Type.PARENTH_OUV, c));
+            case ')': return saveAndReturnTerminal(new Terminal<>(Terminal.Type.PARENTH_FERM, c));
 
             default:
               if(isNumber(c)) { // Is c a number ?
@@ -72,7 +85,7 @@ public class AnalLex {
                 m_currentState = State.A;
 
               }else{
-                throw new IllegalFormatException("Illegal starting character '" + c +"' at position " + m_it.getIndex() + '.');
+                ErreurLex("Une variable ne peut commencer par '" + c + "'.", false);
               }
 
               // Reset the string builder for the next UL
@@ -87,7 +100,8 @@ public class AnalLex {
 
           }else{ // Si ce n'est pas un chiffre, retourner la UL pour le nombre
             m_it.previous(); // Recule pointeur de lecture
-            return new Terminal<>(Terminal.Type.NOMBRE, m_ulBuilder.toString());
+
+            return  saveAndReturnTerminal(new Terminal<>(Terminal.Type.NOMBRE, m_ulBuilder.toString()));
           }
           break;
 
@@ -100,7 +114,8 @@ public class AnalLex {
           }else if(!isLetter(c)){ // Si c n'est pas un caractere valide pour une variable, retourner la UL
             m_ulBuilder.deleteCharAt(m_ulBuilder.length()-1); // Retirer le dernier caractere qui n'est pas une lettre
             m_it.previous(); // Recule pointeur de lecture
-            return new Terminal<>(Terminal.Type.VARIABLE, m_ulBuilder.toString());
+
+            return saveAndReturnTerminal(new Terminal<Object>(Terminal.Type.VARIABLE, m_ulBuilder.toString()));
           }
           break;
         case B:
@@ -108,7 +123,7 @@ public class AnalLex {
             m_ulBuilder.append(c);
             m_currentState = State.A;
           }else{ // Erreur, puisqu'on ne peut terminer une variable avec un "underscore"
-            throw new IllegalFormatException("Impossible de terminer une variable par _. Erreur à la position " + m_it.getIndex() + '.');
+            ErreurLex(prevChar=='_' ? "Une variable ne peut avoir deux sous-tirets." : "Impossible de terminer une variable par _.", true);
           }
           break;
       }
@@ -116,12 +131,18 @@ public class AnalLex {
     return new Terminal<>(m_currentState==State.E ? Terminal.Type.NOMBRE : Terminal.Type.VARIABLE, m_ulBuilder.toString()); // Should only reach this statement if reading the end of file/string to analyze
   }
 
-//
-///** ErreurLex() envoie un message d'erreur lexicale
-// */
-//  public void ErreurLex(String s) {
-//     //
-//  }
+
+/** ErreurLex() envoie un message d'erreur lexicale
+ */
+  public void ErreurLex(String err, boolean printUL) throws IllegalFormatException {
+    StringBuilder error = new StringBuilder(err);
+    error.append(" Erreur à ").append(prevUL.stream().map(x -> x.getValue().toString()).collect(Collectors.joining(" "))).append(' ');
+
+    if(printUL) error.append(m_ulBuilder);
+
+    error.append(", position ").append(m_it.getIndex()).append('.');
+    throw new IllegalFormatException(error.toString());
+  }
 
 
   //Methode principale a lancer pour tester l'analyseur lexical
