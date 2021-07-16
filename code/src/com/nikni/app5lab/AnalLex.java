@@ -16,7 +16,7 @@ public class AnalLex {
   private enum State{S, E, A, B};
 
   private State m_currentState = State.S;
-  private final StringCharacterIterator m_it;
+  public final StringCharacterIterator m_it;
   private final StringBuilder m_ulBuilder = new StringBuilder();
 
   public static class IllegalFormatException extends Exception{

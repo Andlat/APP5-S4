@@ -3,6 +3,8 @@ package com.nikni.app5lab;
 
 /** @author Ahmed Khoumsi */
 
+import java.util.ArrayList;
+
 /** Cette classe effectue l'analyse syntaxique
  */
 public class DescenteRecursive {
@@ -10,18 +12,20 @@ public class DescenteRecursive {
   AnalLex analLex;
   NoeudAST root;
   NoeudAST current;
-  ElemAST firstVal;
-  Boolean error = false;
+  Terminal<Object> term;
+  ArrayList<String> stack;
 
 /** Constructeur de DescenteRecursive :
       - recoit en argument le nom du fichier contenant l'expression a analyser
       - pour l'initalisation d'attribut(s)
  */
-public DescenteRecursive(String in) {
+public DescenteRecursive (String in) throws AnalLex.IllegalFormatException{
 
     analLex = new AnalLex(new Reader(in));
     root = null;
     current = new NoeudAST(null);
+    term = analLex.prochainTerminal();
+
 }
 
 
@@ -29,141 +33,129 @@ public DescenteRecursive(String in) {
  *    Elle retourne une reference sur la racine de l'AST construit
  */
 public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
+  ElemAST n1;
 
- boolean firstNode = true;
-
-  while(analLex.resteTerminal()){
-    Terminal<Object> term = analLex.prochainTerminal();
-
-    if(term.getType()==Terminal.Type.NOMBRE || term.getType()==Terminal.Type.VARIABLE){
-      FeuilleAST feuille = new FeuilleAST(term);
-
-      if(!firstNode) {
-        if (current.left == null) {
-          current.left = feuille;
-          feuille.parent = current;
-        } else if (current.right == null) {
-          current.right = feuille;
-          feuille.parent = current;
-        } else
-          this.ErreurSynt("Error: Too many consecutives variables/numbers");
-      }
-      else{
-        firstVal = feuille;
-      }
+  n1 = S();
 
 
 
-    }
-
-
-    if(firstNode){
-        if(term.getType() == Terminal.Type.PARENTH_OUV ){
-          NoeudAST noeud = new NoeudAST(null);
-          NoeudAST noeud2 = new NoeudAST(null);
-          noeud.parent = noeud2;
-          noeud2.left = noeud;
-          current = noeud;
-          root = noeud2;
-        }
-
-        else{
-          if(firstVal == null){
-            ErreurSynt("First Caracter is neither number, variable or bracket");
-          }
-          NoeudAST noeud = new NoeudAST(null);
-          noeud.left = firstVal;
-          current = noeud;
-          root = noeud;
-        }
-        firstNode = false;
-    }
-
-      else if(term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD){
-
-        if(current.left == null){
-          ErreurSynt("No left value when adding or substracting");
-        }
-
-        while(current.parent != null && current.terminal != null){
-          current = (NoeudAST) current.parent;
-        }
-        if(current.terminal == null){
-          current.terminal = term;
-
-        }
-        else{
-          if(current.right == null){
-            ErreurSynt("Add character found after incomplete expression");
-          }
-          NoeudAST noeud = new NoeudAST(term);
-          noeud.left = root;
-          root.parent = noeud;
-          root = noeud;
-          current = noeud;
-        }
-
-
-      }
-      else if(term.getType() == Terminal.Type.MULT || term.getType() == Terminal.Type.DIV){
-
-        if(current.left == null){
-          ErreurSynt("No left value when mult or div");
-        }
-
-        if(current.terminal == null){
-          current.terminal = term;
-
-        }
-        else{
-          if(current.right == null){
-            ErreurSynt("Mult caracter found after incomplete expression");
-          }
-          NoeudAST noeud = new NoeudAST(term);
-          noeud.left = current.right;
-          current.right = noeud;
-          noeud.parent = current;
-          current = noeud;
-        }
-      }
-
-      else if(term.getType() == Terminal.Type.PARENTH_OUV ){
-        NoeudAST noeud = new NoeudAST(null);
-        noeud.parent = current;
-        if(current.left == null){
-          current.left = noeud;
-
-        }
-        else if(current.right == null){
-          current.right = noeud;
-
-        }
-        else
-          ErreurSynt("Misuse of brackets");
-
-
-        current = noeud;
-      }
-      else if(term.getType() == Terminal.Type.PARENTH_FERM){
-        if(current.right == null || current.left == null || current.terminal == null)
-          ErreurSynt("Bracket closed before end of expression");
-        current = (NoeudAST) current.parent;
-      }
-
-
-
-  }
-  if(current.left == null || current.right ==null || root.left == null || root.right == null){
-    ErreurSynt("Resulting tree contains null nodes");
-  }
-
-  return root;
+  return n1;
 }
 
+ElemAST S()throws AnalLex.IllegalFormatException{
+  System.out.println("S: " + term.getValue());
+  ElemAST n1 = A();
+  while (term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD) {
+    if(term.getType() == Terminal.Type.SOUS){
+      System.out.println("SOUS: " + term.getValue());
+      NoeudAST noeud = new NoeudAST(term);
+      if(!analLex.resteTerminal()){
+        ErreurSynt("No value after -");
+      }
+      term = analLex.prochainTerminal();
+      ElemAST n2 = A();
 
-// Methode pour chaque symbole non-terminal de la grammaire retenue
-// ... 
-// ...
+      noeud.left = n1;
+      noeud.right = n2;
+
+      n1 = noeud;
+
+
+    }
+    else if(term.getType() == Terminal.Type.ADD ){
+      System.out.println("ADD: " + term.getValue());
+      NoeudAST noeud = new NoeudAST(term);
+      if(!analLex.resteTerminal()){
+        ErreurSynt("No value after +");
+      }
+      term = analLex.prochainTerminal();
+      ElemAST n2 = A();
+
+      noeud.left = n1;
+      noeud.right = n2;
+
+      n1 = noeud;
+
+
+    }
+
+  }
+
+
+
+
+
+  return n1;
+}
+  ElemAST A()throws AnalLex.IllegalFormatException{
+    System.out.println("A: " + term.getValue());
+    ElemAST n1 = B();
+    while(term.getType() == Terminal.Type.DIV || term.getType() == Terminal.Type.MULT){
+      if(term.getType() == Terminal.Type.DIV ){
+        System.out.println("Div: " + term.getValue());
+        NoeudAST noeud = new NoeudAST(term);
+        if(!analLex.resteTerminal()){
+          ErreurSynt("No value after /");
+        }
+        term = analLex.prochainTerminal();
+        ElemAST n2 = B();
+
+        noeud.left = n1;
+        noeud.right = n2;
+
+        n1 = noeud;
+
+
+      }
+      else if(term.getType() == Terminal.Type.MULT){
+        System.out.println("Mult: " + term.getValue());
+        NoeudAST noeud = new NoeudAST(term);
+        if(!analLex.resteTerminal()){
+          ErreurSynt("No value after *");
+        }
+        term = analLex.prochainTerminal();
+        ElemAST n2 = B();
+
+        noeud.left = n1;
+        noeud.right = n2;
+
+        n1 = noeud;
+    }
+
+
+
+    }
+    return n1;
+}
+  ElemAST B()throws AnalLex.IllegalFormatException{
+    System.out.println("B: " + term.getValue());
+    ElemAST n1 = null;
+    if(term.getType() == Terminal.Type.VARIABLE || term.getType() == Terminal.Type.NOMBRE){
+      n1 = new FeuilleAST(term);
+      term = analLex.prochainTerminal();
+
+    }
+    else if(term.getType() == Terminal.Type.PARENTH_OUV){
+      System.out.println("ParentOuv: " + term.getValue());
+      if(!analLex.resteTerminal()){
+        ErreurSynt("No value after (");
+      }
+      term = analLex.prochainTerminal();
+      n1 = S();
+      if(term.getType() == Terminal.Type.PARENTH_FERM){
+        System.out.println("ParentFerm: " + term.getValue());
+        term = analLex.prochainTerminal();
+      }
+    }
+    else{
+      ErreurSynt("Value other than number or opening bracket found");
+    }
+
+
+    return n1;
+  }
+
+
 
 
 
@@ -171,13 +163,13 @@ public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
  */
 public void ErreurSynt(String s) throws AnalLex.IllegalFormatException
 {
-  throw new AnalLex.IllegalFormatException("Error received: " + s);
+  throw new AnalLex.IllegalFormatException("Error received: " + s +" at position " + analLex.m_it.getIndex() + '.');
 }
 
 
 
-  //Methode principale a lancer pour tester l'analyseur syntaxique 
-  public static void main(String[] args) {
+  //Methode principale a lancer pour tester l'analyseur syntaxique
+  public static void main(String[] args) throws AnalLex.IllegalFormatException{
     String toWriteLect = "";
     String toWriteEval = "";
 

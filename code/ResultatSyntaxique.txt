@@ -1,2 +1,2 @@
-Lecture de l'AST trouve : (((U_x + 7) * (W_z / 35)) + 5)
-Evaluation de l'AST impossible, puisqu'il contient une variable inconnue: U_xPostfix: U_x 7 + W_z 35 / * 5 +
+Lecture de l'AST trouve : ((((U_x + 7) * W_z) / 35) + 5)
+Evaluation de l'AST impossible, puisqu'il contient une variable inconnue: U_xPostfix: U_x 7 + W_z * 35 / 5 +
