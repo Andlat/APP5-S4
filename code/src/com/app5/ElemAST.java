@@ -8,7 +8,7 @@ public abstract class ElemAST {
   public ElemAST parent = null;
   /** Evaluation d'AST
    */
-  public abstract int EvalAST() throws NumberFormatException;
+  public abstract float EvalAST() throws NumberFormatException;
 
 
   /** Lecture d'AST
@@ -16,11 +16,5 @@ public abstract class ElemAST {
   public abstract String LectAST();
 
   public abstract String toPostfix();
-
-  /** ErreurEvalAST() envoie un message d'erreur lors de la construction d'AST
- */  
-//  public void ErreurEvalAST(String s) {
-//    //
-//  }
 
 }

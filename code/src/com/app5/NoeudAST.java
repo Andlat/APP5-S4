@@ -19,9 +19,9 @@ public class NoeudAST extends ElemAST {
 
   /** Evaluation de noeud d'AST
    */
-  public int EvalAST( ) {
+  public float EvalAST( ) {
      //
-    int result =0;
+    float result =0;
     if(terminal.getType() == Terminal.Type.ADD){
       result = left.EvalAST() + right.EvalAST();
     }
