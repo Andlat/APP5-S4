@@ -9,90 +9,85 @@ import java.util.ArrayList;
  */
 public class DescenteRecursive {
 
-  AnalLex analLex;
-  NoeudAST root;
-  NoeudAST current;
-  Terminal<Object> term;
-  ArrayList<String> prevTerm = new ArrayList<>();
+  private AnalLex analLex;
+  private NoeudAST root;
+  private NoeudAST current;
+  private Terminal<Object> term;
+  private ArrayList<String> prevTerm = new ArrayList<>();
+  private int bracketStackCount = 0;// Stack pour les parentheses. +1 quand parenthese ouvrante. -1 quand parenthese fermante. Le total à la fin de l'analyse doit être de 0
 
   private void prochainTerminal() throws AnalLex.IllegalFormatException {
     term = analLex.prochainTerminal();
     prevTerm.add(term.getValue().toString());
+
+    // Stack de parentheses
+    final var ul = term.getValue().toString();
+    if(ul.equals("(")) ++bracketStackCount;
+    else if(ul.equals(")")) --bracketStackCount;
   }
 
-/** Constructeur de DescenteRecursive :
-      - recoit en argument le nom du fichier contenant l'expression a analyser
-      - pour l'initalisation d'attribut(s)
- */
-public DescenteRecursive (String in) throws AnalLex.IllegalFormatException{
-
-    analLex = new AnalLex(new Reader(in));
-    root = null;
-    current = new NoeudAST(null);
-    prochainTerminal();
-
-}
-
-
-/** AnalSynt() effectue l'analyse syntaxique et construit l'AST.
- *    Elle retourne une reference sur la racine de l'AST construit
- */
-public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
-  ElemAST n1;
-
-  n1 = S();
-
-
-
-  return n1;
-}
-
-ElemAST S()throws AnalLex.IllegalFormatException{
-  System.out.println("S: " + term.getValue());
-  ElemAST n1 = A();
-  while (term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD) {
-    if(term.getType() == Terminal.Type.SOUS){
-      System.out.println("SOUS: " + term.getValue());
-      NoeudAST noeud = new NoeudAST(term);
-      if(!analLex.resteTerminal()){
-        ErreurSynt("Aucune valeur après '-'");
-      }
+  /** Constructeur de DescenteRecursive :
+        - recoit en argument le nom du fichier contenant l'expression a analyser
+        - pour l'initalisation d'attribut(s)
+   */
+  public DescenteRecursive (String in) throws AnalLex.IllegalFormatException{
+      analLex = new AnalLex(new Reader(in));
+      root = null;
+      current = new NoeudAST(null);
       prochainTerminal();
-      ElemAST n2 = A();
-
-      noeud.left = n1;
-      noeud.right = n2;
-
-      n1 = noeud;
-
-
-    }
-    else if(term.getType() == Terminal.Type.ADD ){
-      System.out.println("ADD: " + term.getValue());
-      NoeudAST noeud = new NoeudAST(term);
-      if(!analLex.resteTerminal()){
-        ErreurSynt("Aucune valeur après '+'");
-      }
-      prochainTerminal();
-      ElemAST n2 = A();
-
-      noeud.left = n1;
-      noeud.right = n2;
-
-      n1 = noeud;
-
-
-    }
-
   }
 
 
+  /** AnalSynt() effectue l'analyse syntaxique et construit l'AST.
+   *    Elle retourne une reference sur la racine de l'AST construit
+   */
+  public ElemAST AnalSynt( ) throws AnalLex.IllegalFormatException {
+    ElemAST n1 = S();
+    if(bracketStackCount != 0) ErreurSynt("Le nombre de parenthèses ouvrantes et fermantes ne correspond pas.", false);
+
+    return n1;
+  }
+
+    private ElemAST S()throws AnalLex.IllegalFormatException{
+    System.out.println("S: " + term.getValue());
+    ElemAST n1 = A();
+    while (term.getType() == Terminal.Type.SOUS || term.getType() == Terminal.Type.ADD) {
+      if(term.getType() == Terminal.Type.SOUS){
+        System.out.println("SOUS: " + term.getValue());
+        NoeudAST noeud = new NoeudAST(term);
+        if(!analLex.resteTerminal()){
+          ErreurSynt("Aucune valeur après '-'");
+        }
+        prochainTerminal();
+        ElemAST n2 = A();
+
+        noeud.left = n1;
+        noeud.right = n2;
+
+        n1 = noeud;
 
 
+      }
+      else if(term.getType() == Terminal.Type.ADD ){
+        System.out.println("ADD: " + term.getValue());
+        NoeudAST noeud = new NoeudAST(term);
+        if(!analLex.resteTerminal()){
+          ErreurSynt("Aucune valeur après '+'");
+        }
+        prochainTerminal();
+        ElemAST n2 = A();
 
-  return n1;
-}
-  ElemAST A()throws AnalLex.IllegalFormatException{
+        noeud.left = n1;
+        noeud.right = n2;
+
+        n1 = noeud;
+      }
+    }
+
+    return n1;
+  }
+
+  private ElemAST A()throws AnalLex.IllegalFormatException{
     System.out.println("A: " + term.getValue());
     ElemAST n1 = B();
     while(term.getType() == Terminal.Type.DIV || term.getType() == Terminal.Type.MULT){
@@ -131,8 +126,9 @@ ElemAST S()throws AnalLex.IllegalFormatException{
 
     }
     return n1;
-}
-  ElemAST B()throws AnalLex.IllegalFormatException{
+  }
+
+  private ElemAST B()throws AnalLex.IllegalFormatException{
     System.out.println("B: " + term.getValue());
     ElemAST n1 = null;
     if(term.getType() == Terminal.Type.VARIABLE || term.getType() == Terminal.Type.NOMBRE){
@@ -145,6 +141,7 @@ ElemAST S()throws AnalLex.IllegalFormatException{
       if(!analLex.resteTerminal()){
         ErreurSynt("Aucune valeur après '('");
       }
+
       prochainTerminal();
       n1 = S();
       if(term.getType() == Terminal.Type.PARENTH_FERM){
@@ -156,22 +153,22 @@ ElemAST S()throws AnalLex.IllegalFormatException{
       ErreurSynt("Une unité lexicale autre qu'un nombre/variable ou une parenthèse ouvrante trouvée");
     }
 
-
     return n1;
   }
 
+  /** ErreurSynt() envoie un message d'erreur syntaxique
+   */
+  private void ErreurSynt(String s, boolean showPos) throws AnalLex.IllegalFormatException
+  {
+    StringBuilder error = new StringBuilder("\nErreur: ").append(s);
 
+    if(showPos) error.append(" à la position ").append(analLex.m_it.getIndex()).append(" de");
 
+    error.append(' ').append(String.join(" ", prevTerm)).append('.');
 
-
-/** ErreurSynt() envoie un message d'erreur syntaxique
- */
-public void ErreurSynt(String s) throws AnalLex.IllegalFormatException
-{
-  throw new AnalLex.IllegalFormatException("\nErreur: " + s +" à la position " + analLex.m_it.getIndex() + " de " + String.join(" ", prevTerm) + '.');
-}
-
-
+    throw new AnalLex.IllegalFormatException(error.toString());
+  }
+  private void ErreurSynt(String s) throws AnalLex.IllegalFormatException { ErreurSynt(s, true); }
 
   //Methode principale a lancer pour tester l'analyseur syntaxique
   public static void main(String[] args) throws AnalLex.IllegalFormatException{
